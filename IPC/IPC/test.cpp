@@ -148,3 +148,77 @@ int main()
 
 	return 0;
 }
+
+//server.c
+#include "comm.h"
+
+int main()
+{
+	umask(0); //将文件默认掩码设置为0
+	if (mkfifo(FILE_NAME, 0666) < 0){
+		perror("mkfifo");
+		return 1;
+	}
+	int fd = open(FILE_NAME, O_RDONLY); //打开命名管道文件
+	if (fd < 0){
+		perror("open");
+		return 2;
+	}
+	char msg[128];
+	while (1){
+		msg[0] = '\0'; //每次读之前将msg清空
+		ssize_t s = read(fd, msg, sizeof(msg)-1);
+		if (s > 0){
+			msg[s] = '\0'; //手动设置'\0'，便于输出
+			printf("client# %s", msg);
+			fflush(stdout);
+		}
+		else if (s == 0){
+			printf("client quit!\n");
+			break;
+		}
+		else{
+			printf("read error!\n");
+			break;
+		}
+	}
+	close(fd); //读取完毕，关闭文件
+	return 0;
+}
+
+//client.c
+#include "comm.h"
+
+int main()
+{
+	int fd = open(FILE_NAME, O_WRONLY);
+	if (fd < 0){
+		perror("open");
+		return 1;
+	}
+	char msg[128];
+	while (1){
+		msg[0] = '\0'; //将msg清空
+		printf("Please Enter# ");
+		fflush(stdout);
+		ssize_t s = read(0, msg, sizeof(msg)-1);
+		if (s > 0){
+			msg[s] = '\0';
+			write(fd, msg, strlen(msg));
+		}
+	}
+	close(fd);
+	return 0;
+}
+
+//comm.h
+#pragma once
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <fcntl.h>
+
+#define FILE_NAME "myfifo"
