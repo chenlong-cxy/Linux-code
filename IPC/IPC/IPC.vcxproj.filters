@@ -21,5 +21,11 @@
     <ClCompile Include="shm.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="msg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="sem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

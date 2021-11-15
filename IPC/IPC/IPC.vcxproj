@@ -76,6 +76,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="msg.cpp" />
+    <ClCompile Include="sem.cpp" />
     <ClCompile Include="shm.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
