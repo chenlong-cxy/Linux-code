@@ -19,3 +19,15 @@ int main()
 
 typedef void(*sighandler_t)(int);
 sighandler_t signal(int signum, sighandler_t handler);
+
+#include <stdio.h>
+#include <unistd.h>
+
+int main()
+{
+	while (1){
+		printf("hello signal!\n");
+		sleep(1);
+	}
+	return 0;
+}
