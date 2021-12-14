@@ -80,24 +80,66 @@ int main()
 
 int kill(pid_t pid, int sig);
 
-1 #include <stdio.h>
-2 #include <stdlib.h>
-3 #include <sys/types.h>
-4 #include <signal.h>
-5
-6 void Usage(char* proc)
-7 {
-	8     printf("Usage: %s pid signo\n", proc);
-	9 }
-10 int main(int argc, char* argv[])
-11 {
-	12     if (argc != 3){
-		13         Usage(argv[0]);
-		14         return 1;
-		15
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <signal.h>
+
+void Usage(char* proc)
+{
+	printf("Usage: %s pid signo\n", proc);
+}
+int main(int argc, char* argv[])
+{
+	if (argc != 3){
+		Usage(argv[0]);
+		return 1;
 	}
-	16     pid_t pid = atoi(argv[1]);
-	17     int signo = atoi(argv[2]);
-	18     kill(pid, signo);
-	19     return 0;
-	20 }
+	pid_t pid = atoi(argv[1]);
+	int signo = atoi(argv[2]);
+	kill(pid, signo);
+	return 0;
+}
+
+
+int raise(int sig);
+
+#include <stdio.h>
+#include <unistd.h>
+#include <signal.h>
+
+void handler(int signo)
+{
+	printf("get a signal:%d\n", signo);
+}
+int main()
+{
+	signal(2, handler);
+	while (1){
+		sleep(1);
+		raise(2);
+	}
+	return 0;
+}
+
+void abort(void);
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+
+void handler(int signo)
+{
+	printf("get a signal:%d\n", signo);
+}
+int main()
+{
+	signal(6, handler);
+	while (1){
+		sleep(1);
+		//raise(2);
+		abort();
+	}
+	return 0;
+}
