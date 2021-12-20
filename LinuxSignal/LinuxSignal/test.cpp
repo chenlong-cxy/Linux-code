@@ -144,3 +144,44 @@ int main()
 	}
 	return 0;
 }
+
+
+unsigned int alarm(unsigned int seconds);
+
+#include <stdio.h>
+#include <signal.h>
+#include <unistd.h>
+
+int main()
+{
+	int count = 0;
+	alarm(1);
+	while (1){
+		count++;
+		printf("count: %d\n", count);
+	}
+	return 0;
+}
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+
+int count = 0;
+void handler(int signo)
+{
+	printf("get a signal: %d\n", signo);
+	printf("count: %d\n", count);
+	exit(1);
+}
+int main()
+{
+	signal(SIGALRM, handler);
+	alarm(1);
+	while (1){
+		count++;
+	}
+	return 0;
+}
