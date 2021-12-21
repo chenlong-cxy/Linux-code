@@ -185,3 +185,133 @@ int main()
 	}
 	return 0;
 }
+
+#define _SIGSET_NWORDS (1024 / (8 * sizeof (unsigned long int)))
+typedef struct
+{
+	unsigned long int __val[_SIGSET_NWORDS];
+} __sigset_t;
+
+typedef __sigset_t sigset_t;
+
+
+#include <signal.h>
+
+int sigemptyset(sigset_t *set);
+
+int sigfillset(sigset_t *set);
+
+int sigaddset(sigset_t *set, int signum);
+
+int sigdelset(sigset_t *set, int signum);
+
+int sigismember(const sigset_t *set, int signum);
+
+#include <stdio.h>
+#include <signal.h>
+
+int main()
+{
+	sigset_t s; //用户空间定义的变量
+
+	sigemptyset(&s);
+
+	sigfillset(&s);
+
+	sigaddset(&s, SIGINT);
+
+	sigdelset(&s, SIGINT);
+
+	sigismember(&s, SIGINT);
+	return 0;
+}
+
+int sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+
+int sigpending(sigset_t *set);
+
+#include <stdio.h>
+#include <unistd.h>
+#include <signal.h>
+
+void printPending(sigset_t *pending)
+{
+	int i = 1;
+	for (i = 1; i <= 31; i++){
+		if (sigismember(pending, i)){
+			printf("1 ");
+		}
+		else{
+			printf("0 ");
+		}
+	}
+	printf("\n");
+}
+int main()
+{
+	sigset_t set, oset;
+	sigemptyset(&set);
+	sigemptyset(&oset);
+
+	sigaddset(&set, 2); //SIGINT
+	sigprocmask(SIG_SETMASK, &set, &oset); //阻塞2号信号
+
+	sigset_t pending;
+	sigemptyset(&pending);
+
+	while (1){
+		sigpending(&pending); //获取pending
+		printPending(&pending); //打印pending位图（1表示未决）
+		sleep(1);
+	}
+	return 0;
+}
+
+
+#include <stdio.h>
+#include <unistd.h>
+#include <signal.h>
+
+void printPending(sigset_t *pending)
+{
+	int i = 1;
+	for (i = 1; i <= 31; i++){
+		if (sigismember(pending, i)){
+			printf("1 ");
+		}
+		else{
+			printf("0 ");
+		}
+	}
+	printf("\n");
+}
+void handler(int signo)
+{
+	printf("handler signo:%d\n", signo);
+}
+int main()
+{
+	signal(2, handler);
+	sigset_t set, oset;
+	sigemptyset(&set);
+	sigemptyset(&oset);
+
+	sigaddset(&set, 2); //SIGINT
+	sigprocmask(SIG_SETMASK, &set, &oset); //阻塞2号信号
+
+	sigset_t pending;
+	sigemptyset(&pending);
+
+	int count = 0;
+	while (1){
+		sigpending(&pending); //获取pending
+		printPending(&pending); //打印pending位图（1表示未决）
+		sleep(1);
+		count++;
+		if (count == 20){
+			sigprocmask(SIG_SETMASK, &oset, NULL); //恢复曾经的信号屏蔽字
+			printf("恢复信号屏蔽字\n");
+		}
+	}
+	return 0;
+}
