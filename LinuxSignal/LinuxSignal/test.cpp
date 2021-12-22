@@ -315,3 +315,42 @@ int main()
 	}
 	return 0;
 }
+
+
+int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact);
+
+struct sigaction {
+	void(*sa_handler)(int);
+	void(*sa_sigaction)(int, siginfo_t *, void *);
+	sigset_t   sa_mask;
+	int        sa_flags;
+	void(*sa_restorer)(void);
+};
+
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <signal.h>
+
+struct sigaction act, oact;
+void handler(int signo)
+{
+	printf("get a signal:%d\n", signo);
+	sigaction(2, &oact, NULL);
+}
+int main()
+{
+	memset(&act, 0, sizeof(act));
+	memset(&oact, 0, sizeof(oact));
+
+	act.sa_handler = handler;
+	act.sa_flags = 0;
+	sigemptyset(&act.sa_mask);
+
+	sigaction(2, &act, &oact);
+	while (1){
+		printf("I am a process...\n");
+		sleep(1);
+	}
+	return 0;
+}
