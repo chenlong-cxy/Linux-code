@@ -354,3 +354,68 @@ int main()
 	}
 	return 0;
 }
+
+#include <stdio.h>
+#include <signal.h>
+
+volatile int flag = 0;
+
+void handler(int signo)
+{
+	printf("get a signal:%d\n", signo);
+	flag = 1;
+}
+int main()
+{
+	signal(2, handler);
+	while (!flag);
+	printf("Proc Normal Quit!\n");
+	return 0;
+}
+
+#include <stdio.h>
+#include <unistd.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+
+void handler(int signo)
+{
+	printf("get a signal: %d\n", signo);
+	int ret = 0;
+	while ((ret = waitpid(-1, NULL, WNOHANG)) > 0){
+		printf("wait child %d success\n", ret);
+	}
+}
+int main()
+{
+	signal(SIGCHLD, handler);
+	if (fork() == 0){
+		//child
+		printf("child is running, begin dead: %d\n", getpid());
+		sleep(3);
+		exit(1);
+	}
+	//father
+	while (1);
+	return 0;
+}
+
+#include <stdio.h>
+#include <unistd.h>
+#include <signal.h>
+#include <stdlib.h>
+
+int main()
+{
+	signal(SIGCHLD, SIG_IGN);
+	if (fork() == 0){
+		//child
+		printf("child is running, child dead: %d\n", getpid());
+		sleep(3);
+		exit(1);
+	}
+	//father
+	while (1);
+	return 0;
+}
