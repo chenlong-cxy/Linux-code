@@ -133,7 +133,6 @@ void handler(int signo)
 	printf("get a signal:%d\n", signo);
 }
 
-
 int main()
 {
 	signal(6, handler);
