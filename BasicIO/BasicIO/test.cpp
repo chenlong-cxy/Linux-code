@@ -77,6 +77,7 @@ int dup2(int oldfd, int newfd);
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+
 int main()
 {
 	int fd = open("log.txt", O_WRONLY | O_CREAT, 0666);
