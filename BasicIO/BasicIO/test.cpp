@@ -78,6 +78,7 @@ int dup2(int oldfd, int newfd);
 #include <unistd.h>
 #include <fcntl.h>
 
+
 int main()
 {
 	int fd = open("log.txt", O_WRONLY | O_CREAT, 0666);
@@ -208,4 +209,3 @@ int main()
 	}
 	return 0;
 }
-
