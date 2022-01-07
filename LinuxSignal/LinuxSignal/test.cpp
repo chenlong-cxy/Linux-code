@@ -144,14 +144,11 @@ int main()
 	return 0;
 }
 
-
 unsigned int alarm(unsigned int seconds);
-
 
 #include <stdio.h>
 #include <signal.h>
 #include <unistd.h>
-
 
 int main()
 {
