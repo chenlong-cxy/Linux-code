@@ -427,3 +427,26 @@ int main()
 	}
 	return 0;
 }
+
+
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+void* Routine(void* arg)
+{
+	while (1){
+		printf("new  thread tid: %p\n", pthread_self());
+		sleep(1);
+	}
+}
+int main()
+{
+	pthread_t tid;
+	pthread_create(&tid, NULL, Routine, NULL);
+	while (1){
+		printf("main thread tid: %p\n", pthread_self());
+		sleep(2);
+	}
+	return 0;
+}
