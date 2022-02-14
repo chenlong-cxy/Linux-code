@@ -58,10 +58,22 @@
 //	return 0;
 //}
 
+//#include <stdio.h>
+//int main()
+//{
+//	int tickets = 1000;
+//	--tickets;
+//	return 0;
+//}
+
 #include <stdio.h>
 int main()
 {
 	int tickets = 1000;
-	--tickets;
+	if (tickets > 0)
+	{
+		printf("%d\n", tickets);
+		tickets--;
+	}
 	return 0;
 }
