@@ -156,3 +156,58 @@ unlock:
 //	//OS代码
 //}
 
+//#include <stdio.h>
+//#include <pthread.h>
+//
+//pthread_mutex_t mutex;
+//void* Routine(void* arg)
+//{
+//	pthread_mutex_lock(&mutex);
+//	pthread_mutex_lock(&mutex);
+//	
+//	pthread_exit((void*)0);
+//}
+//int main()
+//{
+//	pthread_t tid;
+//	pthread_mutex_init(&mutex, NULL);
+//	pthread_create(&tid, NULL, Routine, NULL);
+//	
+//	pthread_join(tid, NULL);
+//	pthread_mutex_destroy(&mutex);
+//	return 0;
+//}
+
+//#include <iostream>
+//using namespace std;
+//typedef int(*pcal)(int, int);
+//class Cal
+//{
+//public:
+//	int Add(int x, int y)
+//	{
+//		return x + y;
+//	}
+//};
+//int main()
+//{
+//	cout << &Cal::Add << endl;
+//	printf("%p\n", &Cal::Add);
+//	//pcal addr = &Cal::Add;
+//	//printf("%p\n", addr(2,3));
+//	return 0;
+//}
+
+//初始化条件变量
+int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *restrict attr);
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+
+//销毁条件变量
+int pthread_cond_destroy(pthread_cond_t *cond);
+
+//等待条件变量满足
+int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex);
+
+//唤醒等待
+int pthread_cond_broadcast(pthread_cond_t *cond);
+int pthread_cond_signal(pthread_cond_t *cond);
