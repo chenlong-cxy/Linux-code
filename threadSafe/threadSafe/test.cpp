@@ -211,3 +211,64 @@ int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict m
 //唤醒等待
 int pthread_cond_broadcast(pthread_cond_t *cond);
 int pthread_cond_signal(pthread_cond_t *cond);
+
+#include <iostream>
+#include <cstdio>
+#include <pthread.h>
+
+pthread_mutex_t mutex;
+pthread_cond_t cond;
+void* Routine(void* arg)
+{
+	pthread_detach(pthread_self());
+	std::cout << (char*)arg << " run..." << std::endl;
+	while (true){
+		pthread_cond_wait(&cond, &mutex); //阻塞在这里，直到被唤醒
+		std::cout << (char*)arg << "活动..." << std::endl;
+	}
+}
+int main()
+{
+	pthread_t t1, t2, t3;
+	pthread_mutex_init(&mutex, nullptr);
+	pthread_cond_init(&cond, nullptr);
+	
+	pthread_create(&t1, nullptr, Routine, (void*)"thread 1");
+	pthread_create(&t2, nullptr, Routine, (void*)"thread 2");
+	pthread_create(&t3, nullptr, Routine, (void*)"thread 3");
+	
+	while (true){
+		getchar();
+		pthread_cond_signal(&cond);
+		//pthread_cond_broadcast(&cond);
+	}
+
+	pthread_mutex_destroy(&mutex);
+	pthread_cond_destroy(&cond);
+	return 0;
+}
+
+
+//错误的设计
+pthread_mutex_lock(&mutex);
+while (condition_is_false){
+	pthread_mutex_unlock(&mutex);
+	//解锁之后，等待之前，条件可能已经满足，信号已经发出，但是该信号可能被错过
+	pthread_cond_wait(&cond);
+	pthread_mutex_lock(&mutex);
+}
+pthread_mutex_unlock(&mutex);
+
+
+//等待条件代码
+pthread_mutex_lock(&mutex);
+while (条件为假)
+	pthread_cond_wait(&cond, &mutex);
+修改条件
+pthread_mutex_unlock(&mutex);
+
+//给条件发送信号代码
+pthread_mutex_lock(&mutex);
+设置条件为真
+pthread_cond_signal(&cond);
+pthread_mutex_unlock(&mutex);
