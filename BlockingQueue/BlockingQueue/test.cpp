@@ -95,14 +95,15 @@ int main()
 {
 	srand((unsigned int)time(nullptr));
 	pthread_t producer, consumer;
-	BlockQueue<int> bq;
+	BlockQueue<int>* bq = new BlockQueue<int>;
 	//创建生产者线程和消费者线程
-	pthread_create(&producer, nullptr, Producer, &bq);
-	pthread_create(&consumer, nullptr, Consumer, &bq);
+	pthread_create(&producer, nullptr, Producer, bq);
+	pthread_create(&consumer, nullptr, Consumer, bq);
 
 	//join生产者线程和消费者线程
 	pthread_join(producer, nullptr);
 	pthread_join(consumer, nullptr);
+	delete bq
 	return 0;
 }
 
@@ -136,3 +137,87 @@ void Pop(T& data)
 	}
 	pthread_mutex_unlock(&_mutex);
 }
+
+#pragma once
+#include <iostream>
+
+class Task
+{
+public:
+	Task(int x = 0, int y = 0, int op = 0)
+		: _x(x), _y(y), _op(op)
+	{}
+	~Task()
+	{}
+	void Run()
+	{
+		int result = 0;
+		switch (_op)
+		{
+		case '+':
+			result = _x + _y;
+			break;
+		case '-':
+			result = _x - _y;
+			break;
+		case '*':
+			result = _x * _y;
+			break;
+		case '/':
+			if (_y == 0){
+				std::cout << "Warning: div zero!" << std::endl;
+				result = -1;
+			}
+			else{
+				result = _x / _y;
+			}
+			break;
+		case '%':
+			if (_y == 0){
+				std::cout << "Warning: mod zero!" << std::endl;
+				result = -1;
+			}
+			else{
+				result = _x % _y;
+			}
+			break;
+		default:
+			std::cout << "error operation!" << std::endl;
+			break;
+		}
+		std::cout << _x << _op << _y << "=" << result << std::endl;
+	}
+private:
+	int _x;
+	int _y;
+	char _op;
+};
+
+
+void* Producer(void* arg)
+{
+	BlockQueue<Task>* bq = (BlockQueue<Task>*)arg;
+	const char* arr = "+-*/%";
+	//生产者不断进行生产
+	while (true){
+		int x = rand() % 100;
+		int y = rand() % 100;
+		char op = arr[rand() % 5];
+		Task t(x, y, op);
+		bq->Push(t); //生产数据
+		std::cout << "producer task done" << std::endl;
+	}
+}
+void* Consumer(void* arg)
+{
+	BlockQueue<Task>* bq = (BlockQueue<Task>*)arg;
+	//消费者不断进行消费
+	while (true){
+		sleep(1);
+		Task t;
+		bq->Pop(t); //消费数据
+		t.Run(); //处理数据
+	}
+}
+
+
