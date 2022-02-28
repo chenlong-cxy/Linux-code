@@ -10,6 +10,7 @@ int sem_wait(sem_t *sem);
 //发布信号量
 int sem_post(sem_t *sem);
 
+
 #include <iostream>
 #include <string>
 #include <unistd.h>
@@ -111,4 +112,5 @@ int main()
 	pthread_join(tid4, nullptr);
 	return 0;
 }
+
 
