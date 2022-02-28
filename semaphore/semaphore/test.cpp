@@ -16,6 +16,7 @@ int sem_post(sem_t *sem);
 #include <pthread.h>
 #include <semaphore.h>
 
+
 class Sem{
 public:
 	Sem(int num)
