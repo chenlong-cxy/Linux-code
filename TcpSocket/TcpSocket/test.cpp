@@ -6,3 +6,6 @@ int listen(int sockfd, int backlog);
 
 //获取连接
 int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+//连接服务器
+int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
