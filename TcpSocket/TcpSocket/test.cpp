@@ -831,3 +831,15 @@ private:
 	int _port; //端口号
 	ThreadPool<Task>* _tp; //线程池
 };
+
+//字符串IP转整数IP
+int inet_aton(const char *cp, struct in_addr *inp);
+
+in_addr_t inet_addr(const char *cp);
+
+int inet_pton(int af, const char *src, void *dst);
+
+//整数IP转字符串IP
+char *inet_ntoa(struct in_addr in);
+
+const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
