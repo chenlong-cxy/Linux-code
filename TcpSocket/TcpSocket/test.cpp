@@ -832,6 +832,63 @@ private:
 	ThreadPool<Task>* _tp; //线程池
 };
 
+//英译汉TCP服务器
+#pragma once
+
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <unistd.h>
+
+class Handler
+{
+public:
+	Handler()
+	{}
+	~Handler()
+	{}
+	void operator()(int sock, std::string client_ip, int client_port)
+	{
+		//only for test
+		std::unordered_map<std::string, std::string> dict;
+		dict.insert(std::make_pair("dragon", "龙"));
+		dict.insert(std::make_pair("blog", "博客"));
+		dict.insert(std::make_pair("socket", "套接字"));
+		
+		char buffer[1024];
+		std::string value;
+		while (true){
+			ssize_t size = read(sock, buffer, sizeof(buffer)-1);
+			if (size > 0){ //读取成功
+				buffer[size] = '\0';
+				std::cout << client_ip << ":" << client_port << "# " << buffer << std::endl;
+
+				std::string key = buffer;
+				auto it = dict.find(key);
+				if (it != dict.end()){
+					value = it->second;
+				}
+				else{
+					value = key;
+				}
+				write(sock, value.c_str(), value.size());
+			}
+			else if (size == 0){ //对端关闭连接
+				std::cout << client_ip << ":" << client_port << " close!" << std::endl;
+				break;
+			}
+			else{ //读取失败
+				std::cerr << sock << " read error!" << std::endl;
+				break;
+			}
+		}
+		close(sock); //归还文件描述符
+		std::cout << client_ip << ":" << client_port << " service done!" << std::endl;
+	}
+};
+
+
+
 //字符串IP转整数IP
 int inet_aton(const char *cp, struct in_addr *inp);
 
@@ -843,3 +900,44 @@ int inet_pton(int af, const char *src, void *dst);
 char *inet_ntoa(struct in_addr in);
 
 const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
+
+#include <iostream>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <pthread.h>
+#include <unistd.h>
+
+void* Func1(void* arg)
+{
+	struct sockaddr_in* p = (struct sockaddr_in*)arg;
+	while (1){
+		char* ptr1 = inet_ntoa(p->sin_addr);
+		std::cout << "ptr1: " << ptr1 << std::endl;
+		sleep(1);
+	}
+}
+void* Func2(void* arg)
+{
+	struct sockaddr_in* p = (struct sockaddr_in*)arg;
+	while (1){
+		char* ptr2 = inet_ntoa(p->sin_addr);
+		std::cout << "ptr2: " << ptr2 << std::endl;
+		sleep(1);
+	}
+}
+int main()
+{
+	struct sockaddr_in addr1;
+	struct sockaddr_in addr2;
+	addr1.sin_addr.s_addr = 0;
+	addr2.sin_addr.s_addr = 0xffffffff;
+	
+	pthread_t tid1 = 0;
+	pthread_create(&tid1, nullptr, Func1, &addr1);
+	pthread_t tid2 = 0;
+	pthread_create(&tid2, nullptr, Func2, &addr2);
+	
+	pthread_join(tid1, nullptr);
+	pthread_join(tid2, nullptr);
+	return 0;
+}
