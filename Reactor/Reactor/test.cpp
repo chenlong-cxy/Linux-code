@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 #define SIZE 256
- #define MAX_NUM 64
+#define MAX_NUM 64
 
 //前置声明
 class Reactor;
@@ -19,8 +19,8 @@ typedef int(*callback_t)(EventItem*);
 
 class EventItem{
 public:
-	int _sock;
-	Reactor* _R;
+	int _sock; //文件描述符
+	Reactor* _R; //回指指针
 
 	callback_t _recv_handler; //读回调
 	callback_t _send_handler; //写回调
@@ -150,7 +150,7 @@ int accepter(EventItem* item)
 		int sock = accept(item->_sock, (struct sockaddr*)&peer, &len);
 		if (sock < 0){
 			if (errno == EAGAIN || errno == EWOULDBLOCK){ //并没有读取出错，只是底层没有连接了
-			return 0;
+				return 0;
 			}
 			else if (errno == EINTR){ //读取的过程被信号中断了
 				continue;
@@ -672,3 +672,34 @@ public:
 			_item->_R->EnableReadWrite(_item->_sock, true, true); //打开写事件
 	}
 };
+
+//recver
+
+int recver(EventItem* item)
+{
+	if (item->_sock < 0) //该文件描述符已经被关闭
+		return -1;
+
+	//1、数据读取
+	if (recver_helper(item->_sock, &(item->_inbuffer)) < 0){ //读取失败
+		item->_error_handler(item);
+		return -1;
+	}
+
+	//2、报文切割
+	std::vector<std::string> datagrams;
+	StringUtil::Split(item->_inbuffer, &datagrams, "X");
+
+	//3、反序列化
+	for (auto s : datagrams){
+		struct data d;
+		StringUtil::Deserialize(s, &d._x, &d._y, &d._op);
+
+		Task t(d, item); //构建任务
+		ThreadPool<Task>::GetInstance()->Push(t); //将任务push到线程池的任务队列中
+	}
+	return 0;
+}
+
+//初始化线程池
+ThreadPool<Task>::GetInstance()->ThreadPoolInit();
